@@ -42,14 +42,7 @@ int main(int argc, char * argv[])
         
     }
     int size=sizeof(dataStruct)/sizeof(dataStruct[0]);
-//     printf("%d",size);
-//     for(int k=0;k<size;k++)  
-//     {
-// //    printf("%d",dataStruct[k].id);
-// //    printf("%d",dataStruct[k].arrive);
-// //    printf("%d",dataStruct[k].run_time);
-// //     printf("%d",dataStruct[k].priority);
-//     }
+
     
     // 2. Ask the user for the chosen scheduling algorithm and its parameters, if there are any.
     // scanf("%s",str);
@@ -64,28 +57,29 @@ int main(int argc, char * argv[])
     initClk();
     // To get time use this
 //printf("%d\n",x);
-//  j=0;
+  j=0;
+  int ck;
 
-// while(j<size)
-// {
-//   int ck = getClk();
-// while(j<size&&dataStruct[j].arrive<=ck)
-// {
-//    printf("%d\n",dataStruct[j].id);
-//    printf("%d\n",ck);
-//     j++;
-// }
+ while(j<size)
+{
+    ck = getClk();
+ while(j<size&&dataStruct[j].arrive<=ck)
+ {
+    printf("%d\n",dataStruct[j].id);
+    printf("%d\n",ck);
+     j++;
+ }
 
-// }
+ }
 
 
-    //printf("current time is %d\n", x);
+    printf("current time is %d\n", ck);
     // TODO Generation Main Loop
     // 5. Create a data structure for processes and provide it with its parameters.
    
     // 6. Send the information to the scheduler at the appropriate time.
     // 7. Clear clock resources
-    //destroyClk(true);
+    destroyClk(true);
 }
 
 void clearResources(int signum)

@@ -39,6 +39,7 @@ int main(int argc, char * argv[])
     *shmaddr = clk; /* initialize shared memory */
     while (1)
     {
+        printf("Clock Looping\n");
         sleep(1);
         (*shmaddr)++;
     }
