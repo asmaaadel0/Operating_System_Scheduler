@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
     }
     int j=0;
     ///process_data * dataStruct=malloc(numofProcesses*sizeof(process_data));
-    struct process_data dataStruct[6];
+    struct process_data dataStruct[3];
 
     while (fscanf(infile,"%d",&data)!=EOF)
     {
