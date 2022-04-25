@@ -68,15 +68,18 @@ struct process_data dequeue(queue *q)
     return(n);
 }
 
-// void display(node *head)
-// {
-//     if(head == NULL)
-//     {
-//         printf("NULL\n");
-//     }
-//     else
-//     {
-//         printf("%d\n", head -> data);
-//         display(head->next);
-//     }
-// }
+void display(node *head)
+{
+    if(head == NULL)
+    {
+        printf("NULL\n");
+    }
+    else
+    {
+        printf("%d\n", head -> data.id);
+        printf("%d\n", head -> data.arrive);
+        printf("%d\n", head -> data.run_time);
+        printf("%d\n", head -> data.priority);
+        display(head->next);
+    }
+}
