@@ -23,7 +23,7 @@ int main(int argc, char * argv[])
     if (!infile)
     {
         printf("error in file");
-    }
+    }////////////////////////////////////////////
     while (i<4 && fscanf(infile, "%s", str) != EOF )
     {
         i++;
