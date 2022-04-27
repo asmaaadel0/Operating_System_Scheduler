@@ -11,62 +11,23 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include <string.h>
+
 typedef short bool;
 #define true 1
 #define false 0
 
 #define SHKEY 300
+#define KEYFILE 60
+#define SEMFILE 80
 
-struct process_data
-{
-    int id;
-    int arrive;
-    int run_time;
-    int priority;
-};
-//========================================
-union Semun
-{
-    int val;               /* value for SETVAL */
-    struct semid_ds *buf;  /* buffer for IPC_STAT & IPC_SET */
-    ushort *array;         /* array for GETALL & SETALL */
-    struct seminfo *__buf; /* buffer for IPC_INFO */
-    void *__pad;
-};
 
-void down(int sem)
-{
-    struct sembuf p_op;
-
-    p_op.sem_num = 0;
-    p_op.sem_op = -1;
-    p_op.sem_flg = !IPC_NOWAIT;
-
-    if (semop(sem, &p_op, 1) == -1)
-    {
-        perror("Error in down()");
-        exit(-1);
-    }
-}
-
-void up(int sem)
-{
-    struct sembuf v_op;
-
-    v_op.sem_num = 0;
-    v_op.sem_op = 1;
-    v_op.sem_flg = !IPC_NOWAIT;
-
-    if (semop(sem, &v_op, 1) == -1)
-    {
-        perror("Error in up()");
-        exit(-1);
-    }
-}
 ///==============================
 //don't mess with this variable//
 int * shmaddr;                 //
 //===============================
+
+
 
 
 
@@ -108,5 +69,77 @@ void destroyClk(bool terminateAll)
     if (terminateAll)
     {
         killpg(getpgrp(), SIGINT);
+    }
+}
+
+
+typedef struct process_data
+{
+    int id;
+    int arrive;
+    int run_time;
+    int priority;
+    int waiting_time;
+    int start_time;
+    int finish_time;
+    int total_runtime;
+    int remaining_time;
+}process_data;
+
+//========================================
+union Semun
+{
+    int val;               /* value for SETVAL */
+    struct semid_ds *buf;  /* buffer for IPC_STAT & IPC_SET */
+    ushort *array;         /* array for GETALL & SETALL */
+    struct seminfo *__buf; /* buffer for IPC_INFO */
+    void *__pad;
+};
+
+//========================================
+
+typedef struct processmsgbuff
+{
+    long mtype;
+    struct process_data process;
+    int Noofprocesses_to_Send;
+    bool End;
+
+}processmsgbuff;
+
+typedef struct Algorithmmsgbuff
+{
+    long mtype;
+    int Algorithm;
+    int quatum;
+}Algorithmmsgbuff;
+
+void down(int sem)
+{
+    struct sembuf p_op;
+
+    p_op.sem_num = 0;
+    p_op.sem_op = -1;
+    p_op.sem_flg = !IPC_NOWAIT;
+
+    if (semop(sem, &p_op, 1) == -1)
+    {
+        perror("Error in down()");
+        exit(-1);
+    }
+}
+
+void up(int sem)
+{
+    struct sembuf v_op;
+
+    v_op.sem_num = 0;
+    v_op.sem_op = 1;
+    v_op.sem_flg = !IPC_NOWAIT;
+
+    if (semop(sem, &v_op, 1) == -1)
+    {
+        perror("Error in up()");
+        exit(-1);
     }
 }

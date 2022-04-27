@@ -37,10 +37,26 @@ int main(int argc, char * argv[])
         exit(-1);
     }
     *shmaddr = clk; /* initialize shared memory */
+
+    union Semun semun;
+    int sem1 = semget(SEMFILE, 1, 0666 | IPC_CREAT);
+      if (sem1 == -1 )
+    {
+        perror("Error in create sem");
+        exit(-1);
+    }
+    semun.val = 0;
+        if (semctl(sem1, 0, SETVAL, semun) == -1)
+    {
+        perror("Error in semctl");
+        exit(-1);
+    }
+   
+
     while (1)
     {
-        printf("Clock Looping\n");
         sleep(1);
         (*shmaddr)++;
+        up(sem1);
     }
 }
