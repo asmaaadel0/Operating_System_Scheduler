@@ -1,0 +1,31 @@
+#At	Time	X	Process	Y	State	Arrived	W	Total	Z	Remain	Y	Wait	K
+#At	Time	1	Process	1	Started	Arrived	1	Total	15	Remain	15	Wait	0
+#At	Time	5	Process	1	Stopped	Arrived	1	Total	15	Remain	11	Wait	0
+#At	Time	5	Process	2	Started	Arrived	1	Total	8	Remain	8	Wait	4
+#At	Time	9	Process	2	Stopped	Arrived	1	Total	8	Remain	4	Wait	4
+#At	Time	9	Process	3	Started	Arrived	1	Total	8	Remain	8	Wait	8
+#At	Time	13	Process	3	Stopped	Arrived	1	Total	8	Remain	4	Wait	8
+#At	Time	13	Process	5	Started	Arrived	1	Total	12	Remain	12	Wait	12
+#At	Time	17	Process	5	Stopped	Arrived	1	Total	12	Remain	8	Wait	12
+#At	Time	17	Process	6	Started	Arrived	1	Total	8	Remain	8	Wait	16
+#At	Time	21	Process	6	Stopped	Arrived	1	Total	8	Remain	4	Wait	16
+#At	Time	21	Process	1	Resumed	Arrived	1	Total	15	Remain	11	Wait	16
+#At	Time	25	Process	1	Stopped	Arrived	1	Total	15	Remain	7	Wait	16
+#At	Time	25	Process	2	Resumed	Arrived	1	Total	8	Remain	4	Wait	20
+#At	Time	29	Process	2	Finished	Arrived	1	Total	8	Remain	0	Wait	20	TA	28	WTA	3.50
+#At	Time	29	Process	3	Resumed	Arrived	1	Total	8	Remain	4	Wait	24
+#At	Time	33	Process	3	Finished	Arrived	1	Total	8	Remain	0	Wait	24	TA	32	WTA	4.00
+#At	Time	33	Process	5	Resumed	Arrived	1	Total	12	Remain	8	Wait	28
+#At	Time	37	Process	5	Stopped	Arrived	1	Total	12	Remain	4	Wait	28
+#At	Time	37	Process	6	Resumed	Arrived	1	Total	8	Remain	4	Wait	32
+#At	Time	41	Process	6	Finished	Arrived	1	Total	8	Remain	0	Wait	32	TA	40	WTA	5.00
+#At	Time	41	Process	1	Resumed	Arrived	1	Total	15	Remain	7	Wait	32
+#At	Time	45	Process	1	Stopped	Arrived	1	Total	15	Remain	3	Wait	32
+#At	Time	45	Process	5	Resumed	Arrived	1	Total	12	Remain	4	Wait	36
+#At	Time	49	Process	5	Finished	Arrived	1	Total	12	Remain	0	Wait	36	TA	48	WTA	4.00
+#At	Time	49	Process	1	Resumed	Arrived	1	Total	15	Remain	3	Wait	36
+#At	Time	52	Process	1	Finished	Arrived	1	Total	15	Remain	0	Wait	36	TA	51	WTA	3.40
+#At	Time	52	Process	4	Started	Arrived	1	Total	6	Remain	6	Wait	51
+#At	Time	56	Process	4	Stopped	Arrived	1	Total	6	Remain	2	Wait	51
+#At	Time	56	Process	4	Resumed	Arrived	1	Total	6	Remain	2	Wait	51
+#At	Time	58	Process	4	Finished	Arrived	1	Total	6	Remain	0	Wait	51	TA	57	WTA	9.50

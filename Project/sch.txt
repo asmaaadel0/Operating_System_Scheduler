@@ -1,0 +1,268 @@
+#include "headers.h"
+#include "Queue.c"
+#include "priorityQueue.c"
+#include "hashmap.c"
+void hangler_USR1(int sig_num);
+int Algorithm_num;
+int quantum_num;
+int rec_val, send_val;
+int sem2;
+int sem_hpf_1,sem_hpf_2;// zeinab && asmaa
+minHeap ready_Queue_HPF;
+minHeap ready_Queue_SRTF;
+queue ready_Queue_RR;
+void HPF_Algorithm();
+void SRTF_Algorithm();
+void RR_Algorithm();
+int pid;
+int msgq_pro_sch_id;
+int i = 0;
+struct hashmap *process_table;
+bool one_process_arrived;
+uint64_t pcb_hash(const void *item, uint64_t seed0, uint64_t seed1)
+{
+    const struct PCB *pcb = item;
+    // int *x = &pcb->process_id;
+    return hashmap_sip(&pcb->process_system_id, sizeof(int), seed0, seed1);
+}
+int pcb_compare(const void *a, const void *b, void *udata)
+{
+    const struct PCB *ua = a;
+    const struct PCB *ub = b;
+    if (ua->process_system_id > ub->process_system_id)
+        return 1;
+    else if (ua->process_system_id < ub->process_system_id)
+        return -1;
+    else
+        return 0;
+}
+bool pcb_iter(const void *item, void *udata)
+{
+    const struct PCB *pcb = item;
+    char str[10];
+    if (pcb->state == 0)
+        strcpy(str, "waiting");
+    else
+        strcpy(str, "running");
+    printf("%d    %d           %s    %d         %d     %d     %d     2.%d    %d\n", pcb->process_id, pcb->priority, str, pcb->start_time,pcb->excution_time, pcb->waiting_time, pcb->remaining_time, pcb->cumulative_running_time, pcb->process_system_id);
+    return true;
+}
+int main(int argc, char *argv[])
+{
+    signal(SIGUSR1, hangler_USR1);
+    one_process_arrived=false;
+    process_table = hashmap_new(sizeof(struct PCB), 0, 0, 0, pcb_hash, pcb_compare, NULL, NULL);
+    //===================================ipcs====================================//
+    // Messge queue
+    int msgq_id;
+    msgq_id = msgget(KEYFILE, 0666 | IPC_CREAT);
+    if (msgq_id == -1)
+    {
+        perror("Error in msgget()");
+        exit(-1);
+    }
+    msgq_pro_sch_id = msgget(KEYFILE_pro_sch, 0666 | IPC_CREAT);
+    if (msgq_pro_sch_id == -1)
+    {
+        perror("Error in msgget()");
+        exit(-1);
+    }
+    sem2 = getsem(SEM2KEY);
+    sem_hpf_1 = getsem(SEMHPF1KEY);// zeinab && asmaa
+    sem_hpf_2 = getsem(SEMHPF2KEY);// zeinab && asmaa
+    //============================================================================//
+    Algorithmmsgbuff algorithm;
+    rec_val = msgrcv(msgq_id, &algorithm, sizeof(algorithm.Algorithm) + sizeof(algorithm.quantum), 10, !IPC_NOWAIT);
+    if (rec_val == -1)
+        perror("Error in receive");
+    Algorithm_num = algorithm.Algorithm;
+    quantum_num = algorithm.quantum;
+    //  printf("recieving value is%d\n",Algorithm_num);
+    //  printf("recieving value quantum is%d\n",algorithm.quantum);
+    //==========================================================================//
+    if (Algorithm_num == 0)
+        ready_Queue_HPF = initMinHeap();
+    else if (Algorithm_num == 1)
+        ready_Queue_SRTF = initMinHeap();
+    else if (Algorithm_num == 2)
+        ready_Queue_RR = initQueue();
+    //=========================================================================//
+    initClk();
+    while (1)
+    {
+        down(sem2);
+        int x = getClk();
+        //==========================================================================//
+        // 2.recieve the process whose time is now from the process_genrator
+        int Noofprocessestorecieve = 1;
+        processmsgbuff processmessage;
+        process_data processrecieved;
+        while (Noofprocessestorecieve != 0)
+        {
+            rec_val = msgrcv(msgq_id, &processmessage, sizeof(processmessage.Noofprocesses_to_Send) + sizeof(processmessage.process) + sizeof(processmessage.End), 7, !IPC_NOWAIT);
+            if (rec_val == -1)
+                perror("Error in receive");
+
+            Noofprocessestorecieve = processmessage.Noofprocesses_to_Send;
+            // printf("clck= %d scedualr:i recieved no. of process %d\n", x, Noofprocessestorecieve);
+            if (Noofprocessestorecieve == 0)
+                break;
+            // take this process sent it is its time to take ist order in the ready qeueu:)
+            processrecieved.id = processmessage.process.id;
+            processrecieved.arrive = processmessage.process.arrive;
+            processrecieved.run_time = processmessage.process.run_time;
+            processrecieved.priority = processmessage.process.priority;
+
+            // add it to the ready queue
+            pid = fork();
+            // clck
+            if (pid == 0)
+            {
+                execl("process.out", "process", NULL);
+            }
+            else if (pid == -1)
+            {
+                perror("Error in fork\n");
+                exit(-1);
+            }
+            /////////////////zeinab && asmaa arrive///////////////
+            hashmap_set(process_table, &(struct PCB){.process_id = processrecieved.id, .priority = processrecieved.priority, .excution_time = processrecieved.run_time, .waiting_time = 0, .remaining_time = processrecieved.run_time, .cumulative_running_time = 0, .process_system_id = pid, .state = waiting,.start_time=-1,.arrival_time=processrecieved.arrive});
+            // add it to the ready queue
+            //////////////////////////////////////////////////////////////////////////////////////////////
+            processrecieved.system_process_id=pid;
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            
+            if (Algorithm_num == 0)
+            { 
+                push(&ready_Queue_HPF, processrecieved.priority, processrecieved);
+            }
+            else if (Algorithm_num == 1)
+            {
+                push(&ready_Queue_SRTF, processrecieved.run_time, processrecieved);
+                one_process_arrived=true;
+            }
+            else if (Algorithm_num == 2)
+                pushQueue(&ready_Queue_RR, processrecieved);
+            // send remaining time for first time = run time
+            buff_pro_sch buff_pro_sch_mes;
+            buff_pro_sch_mes.mtype = pid;
+            buff_pro_sch_mes.Remainingtime = processrecieved.run_time;
+            // printf("remain in sch %d\n",buff_pro_sch_mes.Remainingtime);
+            send_val = msgsnd(msgq_pro_sch_id, &buff_pro_sch_mes, sizeof(buff_pro_sch_mes.Remainingtime), !IPC_NOWAIT);
+            if (send_val == -1)
+                perror("Errror in send");
+            // printf("scedualr:No of process to rec%d Porcess recived id:%d    arrival time %d\n", Noofprocessestorecieve,processrecieved.id, processrecieved.arrive);
+        }
+        //===============================================================================================//
+        // //printing  raedy queue to check only
+
+        printf("current time is in sch%d\n", x);
+        if (Algorithm_num == 0)
+        {
+            printf("\nnew pcb\n");
+            hashmap_scan(process_table, pcb_iter, NULL);
+            printf("\nsize queue = %d\n",getsize_periority(&ready_Queue_HPF));
+            // printf("readyqueue size %d\n", getsize(&ready_Queue_HPF));
+            //  printqueue(&ready_Queue_HPF);
+            HPF_Algorithm();
+        }
+
+        else if (Algorithm_num == 1)
+        {
+
+            // printf("readyqueue size %d\n", getsize(&ready_Queue_SRTF));
+            //  printqueue(&ready_Queue_SRTF);
+            SRTF_Algorithm();
+        }
+
+        else if (Algorithm_num == 2)
+        {
+            // printf("readyqueue size %d\n", getsize(&ready_Queue_RR));
+            printqueue(&ready_Queue_RR);
+            RR_Algorithm();
+        }
+    }
+    // TODO implement the scheduler :)
+    // upon termination release the clock resources.
+
+    destroyClk(true);
+}
+void HPF_Algorithm() 
+{
+    process_data process_running;
+    process_running=pop(&ready_Queue_HPF);
+    struct PCB x = {.process_system_id = process_running.system_process_id};
+    struct PCB *pcb;
+    pcb = hashmap_get(process_table, &x);
+    pcb->state=running;
+    pcb->excution_time= process_running.run_time;
+    ///////////////start time////////////////////////
+    //pcb->start_time=getClk();
+    //pcb->cumulative_running_time=
+    //pcb->waiting_time=pcb->start_time-pcb->arrival_time;
+    
+    printf("\nprocess run %d\n",pcb->process_id);
+    buff_pro_sch buff_pro_sch_mes;
+    buff_pro_sch_mes.mtype = process_running.system_process_id;
+    down(sem_hpf_1);
+    int end =getClk()+process_running.run_time;
+    down(sem_hpf_2);
+    int y=getClk();
+    while (y<=end)
+    {
+        buff_pro_sch_mes.Remainingtime = 1;
+        send_val = msgsnd(msgq_pro_sch_id, &buff_pro_sch_mes, sizeof(buff_pro_sch_mes.Remainingtime), !IPC_NOWAIT);
+        if (send_val == -1)
+            perror("Errror in send");    
+        down(sem_hpf_2);    
+        y=getClk();
+        printf("runnn %d\n",y);
+    }
+    
+}
+void SRTF_Algorithm() {}
+void RR_Algorithm()
+{
+    if (i == 0)
+    {
+        buff_pro_sch buff_pro_sch_mes;
+        /// pcb modifyyyyyyyyyyyyy
+        buff_pro_sch_mes.mtype = pid;
+        buff_pro_sch_mes.Remainingtime = 1;
+        i = 1;
+        send_val = msgsnd(msgq_pro_sch_id, &buff_pro_sch_mes, sizeof(buff_pro_sch_mes.Remainingtime), !IPC_NOWAIT);
+        if (send_val == -1)
+            perror("Errror in send");
+    }
+    else if (i == 1)
+    {
+        i = 2;
+    }
+    else if (i == 2)
+    {
+        buff_pro_sch buff_pro_sch_mes;
+        /// pcb modifyyyyyyyyyyyyy
+        buff_pro_sch_mes.mtype = pid;
+        buff_pro_sch_mes.Remainingtime = 1;
+        i = 1;
+        send_val = msgsnd(msgq_pro_sch_id, &buff_pro_sch_mes, sizeof(buff_pro_sch_mes.Remainingtime), !IPC_NOWAIT);
+        if (send_val == -1)
+            perror("Errror in send");
+    }
+}
+void hangler_USR1(int sig_num)
+{
+    int stat_loc;
+    bool process_finish=true;
+    pid=wait(&stat_loc);
+    printf("in handler%d\n",pid);
+    struct PCB x = {.process_system_id = pid}; ////////running_pro_id for process running////////
+    ///////////////calculate data///////////////
+    //////////////asmaa && zeinab///////////////
+    //x->remaining_time=0;
+    struct PCB *pcb;
+    printf("\n-- delete  --\n");
+    pcb = hashmap_delete(process_table, &x);
+    hashmap_scan(process_table, pcb_iter, NULL);
+    signal(SIGUSR1, hangler_USR1);
+}
