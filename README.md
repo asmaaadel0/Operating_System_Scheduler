@@ -78,10 +78,10 @@ $ git clone https://github.com/asmaaadel0/Operating_System_Scheduler.git
     </td>
     <td align="center">
     <td align="center">
-    <a href="https://github.com/emanshahda12" target="_black">
-    <img src="https://avatars.githubusercontent.com/u/102928324?v=4" width="150px;" alt="Eman Ali"/>
+    <a href="https://github.com/emanshahda" target="_black">
+    <img src="https://avatars.githubusercontent.com/u/89708797?v=4" width="150px;" alt="Eman Ali"/>
     <br />
-    <sub><b>Eman Ali</b></sub></a>
+    <sub><b>Eman Shahda</b></sub></a>
     </td>
     <td align="center">
     <a href="https://github.com/zeinabmoawad" target="_black">
