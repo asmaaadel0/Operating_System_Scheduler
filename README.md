@@ -71,8 +71,8 @@ $ git clone https://github.com/asmaaadel0/Operating_System_Scheduler.git
     <sub><b>Asmaa Adel</b></sub></a>
     </td>
         <td align="center">
-    <a href="[https://github.com/BasmaElhoseny](https://github.com/BasmaElhoseny01)" target="_black">
-    <img src="[https://avatars.githubusercontent.com/u/62777533?v=4](https://avatars.githubusercontent.com/u/72309546?v=4)" width="150px;" alt="Basma Elhoseny"/>
+    <a href="https://github.com/BasmaElhoseny" target="_black">
+    <img src="https://avatars.githubusercontent.com/u/62777533?v=4" width="150px;" alt="Basma Elhoseny"/>
     <br />
     <sub><b>Basma Elhoseny</b></sub></a>
     </td>
